@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  mongodb:
+    container_name: mongodb
+    image: docker.io/mongo
+    ports:
+      - "27107:27107"
+    volumes:
+      - ./backend/data:/data
+    networks:
+      - twotier
+
+  backend:
+    container_name: backend
+    build: ./backend
+    env_file:
+      - ./backend/.env.sample
+    ports:
+      - "5000:5000"
+    networks:
+      - twotier
+    depends_on:
+      - mongodb
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    env_file:
+      - ./frontend/.env.sample
+    ports:
+      - "5173:5173"
+    networks:
+      - twotier
+    depends_on:
+      - backend
+
+volumes:
+  data:
+
+networks:
+  twotier:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.10.0/24
+
